@@ -1,0 +1,34 @@
+version: "3.9"
+services:
+  api:
+    build:
+      context: ./src/Api
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings:TodoDbContext: "Server=db;Port=5432;Database=todo;UserId=todo;Password=745h75hg74nk;"
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: todo
+      POSTGRES_PASSWORD: 745h75hg74nk
+      POSTGRES_DB: todo
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pgconf:/etc/postgresql
+      - pglog:/var/log/postgresql
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
+    driver: local
+  pgconf:
+    driver: local
+  pglog:
+    driver: local

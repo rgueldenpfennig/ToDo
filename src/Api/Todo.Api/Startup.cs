@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Serilog;
 using Todo.Api.Bootstrapping;
 using Todo.Persistence;
 
@@ -66,6 +67,8 @@ namespace Todo.Api
                 app.UseHsts();
                 app.UseHttpsRedirection();
             }
+
+            app.UseSerilogRequestLogging();
 
             app.UseSwagger();
             app.UseSwaggerUI(options =>

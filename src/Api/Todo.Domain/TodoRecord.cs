@@ -5,18 +5,18 @@ using System.Diagnostics;
 namespace Todo.Domain
 {
     [DebuggerDisplay("{" + nameof(GetDebuggerDisplay) + "(),nq}")]
-    public class TodoRecord
+    public class TodoRecord : EntityBase
     {
-        public Guid Id { get; set; }
-
         [Required]
-        public string Title { get; set; } = null!;
+        public string Title { get; private set; } = null!;
 
-        public DateTime CreatedAtUtc { get; set; }
-
-        public TodoRecord()
+        public TodoRecord(string title) : base(Guid.NewGuid())
         {
-            Id = Guid.NewGuid();
+            Title = title;
+        }
+
+        private TodoRecord() : base()
+        {
         }
 
         private string GetDebuggerDisplay()

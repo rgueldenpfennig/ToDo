@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Todo.Domain
+﻿namespace Todo.Domain
 {
     public class TodoRecordBuilder
     {
@@ -21,11 +19,7 @@ namespace Todo.Domain
 
         public TodoRecord Build()
         {
-            return new TodoRecord
-            {
-                CreatedAtUtc = DateTime.UtcNow,
-                Title = _title
-            };
+            return new TodoRecord(_title);
         }
     }
 }

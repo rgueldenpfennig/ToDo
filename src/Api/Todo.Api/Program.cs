@@ -1,5 +1,6 @@
 using System;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
@@ -16,10 +17,17 @@ namespace Todo.Api
                 .Enrich.WithMachineName()
                 .Enrich.WithThreadId()
                 .WriteTo.Console()
-                .CreateBootstrapLogger();
+                .CreateLogger()
+                .ForContext<Program>();
 
             try
             {
+                var config = GetConfiguration(args);
+
+                Log.Logger = new LoggerConfiguration()
+                    .ReadFrom.Configuration(config)
+                    .CreateBootstrapLogger().ForContext<Program>();
+
                 Log.Information("Starting web host");
                 Log.Information(
                     "Running with CLR {CLRVersion} on {OSVersion}",
@@ -51,5 +59,18 @@ namespace Todo.Api
                 {
                     webBuilder.UseStartup<Startup>();
                 });
+
+        private static IConfiguration GetConfiguration(string[] args)
+        {
+            var environmentName = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
+
+            var configBuilder = new ConfigurationBuilder()
+               .AddJsonFile("appsettings.json", false)
+               .AddJsonFile($"appsettings.{environmentName}.json", true)
+               .AddCommandLine(args)
+               .AddEnvironmentVariables();
+
+            return configBuilder.Build();
+        }
     }
 }

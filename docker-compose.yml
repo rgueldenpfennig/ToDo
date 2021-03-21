@@ -7,10 +7,12 @@ services:
     environment:
       ASPNETCORE_ENVIRONMENT: Development
       ConnectionStrings:TodoDbContext: "Server=db;Port=5432;Database=todo;UserId=todo;Password=745h75hg74nk;"
+      Serilog__WriteTo__1__Args__serverUrl: http://seq:5341/
     ports:
       - "8080:80"
     depends_on:
       - db
+      - seq
   db:
     image: postgres
     restart: always
@@ -24,6 +26,16 @@ services:
       - pglog:/var/log/postgresql
     ports:
       - "5432:5432"
+  seq:
+    image: datalust/seq
+    restart: always
+    environment:
+      ACCEPT_EULA: "Y"
+    mem_limit: 512m
+    mem_reservation: 512m
+    ports:
+      - "5342:80"
+      - "5341:5341"
 
 volumes:
   pgdata:

@@ -1,13 +1,10 @@
 using System;
-using System.IO;
-using System.Reflection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 using Serilog;
 using Todo.Api.Bootstrapping;
 using Todo.Persistence;
@@ -16,42 +13,18 @@ namespace Todo.Api
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddPersistence(Configuration);
             services.AddControllers();
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo
-                {
-                    Version = "v1",
-                    Title = "ToDo API",
-                    Description = "API for just another ToDo app",
-                    TermsOfService = new Uri("https://github.com/rgueldenpfennig/ToDo"),
-                    Contact = new OpenApiContact
-                    {
-                        Name = "Robin Gueldenpfennig",
-                        Email = string.Empty,
-                        Url = new Uri("https://twitter.com/gueldenpfennigr"),
-                    },
-                    License = new OpenApiLicense
-                    {
-                        Name = "Use under MIT License",
-                        Url = new Uri("https://github.com/rgueldenpfennig/ToDo/blob/main/LICENSE"),
-                    }
-                });
-
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
+            services.AddApiDocumentation();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILogger<Startup> logger)
@@ -61,6 +34,7 @@ namespace Todo.Api
                 app.UseDeveloperExceptionPage();
 
                 EnsureDatabase(app, logger);
+                LogConfigurationSettings(Configuration, logger);
             }
             else
             {
@@ -104,6 +78,12 @@ namespace Todo.Api
                     logger.LogError(ex, "An error occurred creating the DB");
                 }
             }
+        }
+
+        private static void LogConfigurationSettings(IConfiguration configuration, ILogger<Startup> logger)
+        {
+            var config = ((IConfigurationRoot)configuration).GetDebugView();
+            logger.LogDebug("Logging configuration:\n{configuration}", config);
         }
     }
 }
